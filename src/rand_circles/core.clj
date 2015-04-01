@@ -15,7 +15,26 @@
             [incanter interpolation])
   (:gen-class))
 
+;; Declaring all functions upfront allows me to reorder them in the way that's easiest to understand, rather than in order of dependency. 
+
 (declare -main expt-list reciprocal negate rand-in-range rands-in-range rands-with-amplitude linspace zip get-cubic-interpolator sum sum-funcs get-perlin-func)
+
+;; ## How Perlin noise works. 
+
+;; Perlin noise is smoother and more natural than a list of random values. It achieves this in the following way:
+
+;; 1. Pick a few random points in some range (i.e. between -1 and 1)
+;; 2. Spread these points evenly over some domain (set of x-values)
+;; 3. Interpolate them, producing a smooth function that intersects each randomly-generated point. 
+;; 4. Repeat the process, but choose more points, and in a smaller range (i.e. between -0.5 and 0.5)
+;; 5. Now, add the functions together. This superimposes the rougher function on the first, smoother function.
+;; 6. You can repeat this process of making new functions and summing them all up as many times as you like, though each function will change the output of the noise generator less and less. 
+
+;; ## Implementing a Perlin noise generator
+
+;; The function `get-perlin-func` returns a function defined over the domain [0,1] which will output a random value around the range [-1,1]. The first argument, `freq`, defines how many random points to select for the first step explained above. The higher the number, the rougher the noise. If the number is below 3, however, there won't be enough points to fit a cubic interpolator, and the function will fail.  
+
+;; The second argument, `levels`, defines how many times to go through the steps above. If `levels` is 1, then only one set of random points will be generated. If `levels` is 2, then two sets of random points will be generated, interpolated, and summed. 
 
 (defn get-perlin-func [freq levels]
   "Return a function, valid over domain [0,1] which produces perlin noise."
