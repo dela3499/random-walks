@@ -1,3 +1,13 @@
+(ns rand-circles.core
+  (:require [incanter.interpolation :refer [interpolate]]
+            [rand-circles.util :refer [linspace 
+                                       zip 
+                                       expt-list 
+                                       reciprocal 
+                                       rands-with-amplitude 
+                                       sum-funcs]])
+  (:gen-class))
+
 ;; # Random walks with Perlin Noise
 
 ;; [Random walks](http://natureofcode.com/book/introduction/) provide a simple way to create natural-looking shapes and lines. [Perlin noise](http://en.wikipedia.org/wiki/Perlin_noise) is one method that allows you to finely tune how rough you'd like your data to be. 
@@ -5,15 +15,6 @@
 ;; First, we'll create a Perlin noise generator, then use it to control the position, color, and size of several shapes. 
 
 ;; Let's get started!
-
-;; ## Preliminaries
-
-;; First, we'll need to import a math library and an interpolation library. The math library will provide an exponentiation function, and the interpolation library will form the core of the Perlin noise generator. 
-(ns rand-circles.core
-  (:require [clojure.math.numeric-tower :as math]
-            [incanter interpolation]
-            [rand-circles.util :refer :all])
-  (:gen-class))
 
 ;; ## How Perlin noise works. 
 
@@ -34,7 +35,7 @@
    where domain is assumed in [0,1]."
   (let [x (linspace 0 1 (count y))
         points (zip x y)]
-   (incanter.interpolation/interpolate points :cubic)))
+   (interpolate points :cubic)))
 
 ;; The function `get-perlin-func` returns a function defined over the domain [0,1] which will output a random value around the range [-1,1]. The first argument, `freq`, defines how many random points to select for the first step explained above. The higher the number, the rougher the noise. If the number is below 3, however, there won't be enough points to fit a cubic interpolator, and the function will fail.  
 ;;
@@ -46,7 +47,7 @@
 (defn get-perlin-func [freq levels]
   "Return a function, valid over domain [0,1] which produces Perlin noise."
   (let [c (expt-list 2 levels)
-        frequencies (map #(* freq %) c)
+        frequencies (map (partial * freq) c)
         amplitudes  (map reciprocal c)]
    (->> [frequencies amplitudes]
         (apply map rands-with-amplitude)

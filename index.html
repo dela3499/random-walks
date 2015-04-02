@@ -2866,19 +2866,20 @@ net.brehaut.ClojureTools = (function (SH) {
   };
 })(SyntaxHighlighter);
 </script><title>rand-circles -- Marginalia</title></head><body><table><tr><td class="docs"><div class="header"><h1 class="project-name"><a href="none">rand-circles</a></h1><h2 class="project-version">0.1.0-SNAPSHOT</h2><br /><p>Generative art: create a random-walk.</p>
-</div><div class="dependencies"><h3>dependencies</h3><table><tr><td class="dep-name">org.clojure/clojure</td><td class="dotted"><hr /></td><td class="dep-version">1.6.0</td></tr><tr><td class="dep-name">org.clojure/math.numeric-tower</td><td class="dotted"><hr /></td><td class="dep-version">0.0.4</td></tr><tr><td class="dep-name">incanter</td><td class="dotted"><hr /></td><td class="dep-version">1.9.0</td></tr><tr><td class="dep-name">incanter/incanter-core</td><td class="dotted"><hr /></td><td class="dep-version">1.9.0</td></tr></table></div></td><td class="codes" style="text-align: center; vertical-align: middle;color: #666;padding-right:20px"><br /><br /><br />(this space intentionally left almost blank)</td></tr><tr><td class="docs"><div class="toc"><a name="toc"><h3>namespaces</h3></a><ul><li><a href="#rand-circles.core">rand-circles.core</a></li></ul></div></td><td class="codes">&nbsp;</td></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#rand-circles.core" name="rand-circles.core"><h1 class="project-name">rand-circles.core</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><h1>Random walks with Perlin Noise</h1>
+</div><div class="dependencies"><h3>dependencies</h3><table><tr><td class="dep-name">org.clojure/clojure</td><td class="dotted"><hr /></td><td class="dep-version">1.6.0</td></tr><tr><td class="dep-name">org.clojure/math.numeric-tower</td><td class="dotted"><hr /></td><td class="dep-version">0.0.4</td></tr><tr><td class="dep-name">incanter</td><td class="dotted"><hr /></td><td class="dep-version">1.9.0</td></tr><tr><td class="dep-name">incanter/incanter-core</td><td class="dotted"><hr /></td><td class="dep-version">1.9.0</td></tr></table></div></td><td class="codes" style="text-align: center; vertical-align: middle;color: #666;padding-right:20px"><br /><br /><br />(this space intentionally left almost blank)</td></tr><tr><td class="docs"><div class="toc"><a name="toc"><h3>namespaces</h3></a><ul><li><a href="#rand-circles.core">rand-circles.core</a></li><li><a href="#rand-circles.util">rand-circles.util</a></li></ul></div></td><td class="codes">&nbsp;</td></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#rand-circles.core" name="rand-circles.core"><h1 class="project-name">rand-circles.core</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(ns rand-circles.core
+  (:require [incanter.interpolation :refer [interpolate]]
+            [rand-circles.util :refer [linspace 
+                                       zip 
+                                       expt-list 
+                                       reciprocal 
+                                       rands-with-amplitude 
+                                       sum-funcs]])
+  (:gen-class))</pre></td></tr><tr><td class="docs"><h1>Random walks with Perlin Noise</h1>
 </td><td class="codes"></td></tr><tr><td class="docs"><p><a href="http://natureofcode.com/book/introduction/">Random walks</a> provide a simple way to create natural-looking shapes and lines. <a href="http://en.wikipedia.org/wiki/Perlin_noise">Perlin noise</a> is one method that allows you to finely tune how rough you'd like your data to be. </p>
 </td><td class="codes"></td></tr><tr><td class="docs"><p>First, we'll create a Perlin noise generator, then use it to control the position, color, and size of several shapes. </p>
 </td><td class="codes"></td></tr><tr><td class="docs"><p>Let's get started!</p>
-</td><td class="codes"></td></tr><tr><td class="docs"><h2>Preliminaries</h2>
-</td><td class="codes"></td></tr><tr><td class="docs"><p>First, we'll need to import a math library and an interpolation library. The math library will provide an exponentiation function, and the interpolation library will form the core of the Perlin noise generator. </p>
-</td><td class="codes"><pre class="brush: clojure">(ns rand-circles.core
-  (:require [clojure.math.numeric-tower :as math]
-            [incanter interpolation])
-  (:gen-class))</pre></td></tr><tr><td class="docs"><p>Declaring all functions upfront allows me to reorder them in the way that's easiest to understand, rather than in order of dependency. </p>
-</td><td class="codes"><pre class="brush: clojure">(declare -main expt-list reciprocal negate rand-in-range 
-  rands-in-range rands-with-amplitude linspace zip 
-  get-cubic-interpolator sum sum-funcs get-perlin-func)</pre></td></tr><tr><td class="docs"><h2>How Perlin noise works.</h2>
+</td><td class="codes"></td></tr><tr><td class="docs"><h2>How Perlin noise works.</h2>
 </td><td class="codes"></td></tr><tr><td class="docs"><p>Perlin noise is smoother and more natural than a list of random values. It achieves this in the following way:</p>
 </td><td class="codes"></td></tr><tr><td class="docs"><ol>
 <li>Pick a few random points in some range (i.e. between -1 and 1)</li>
@@ -2889,34 +2890,57 @@ net.brehaut.ClojureTools = (function (SH) {
 <li>You can repeat this process of making new functions and summing them all up as many times as you like, though each function will change the output of the noise generator less and less.</li>
 </ol>
 </td><td class="codes"></td></tr><tr><td class="docs"><h2>Implementing a Perlin noise generator</h2>
-</td><td class="codes"></td></tr><tr><td class="docs"><p>The function <code>get-perlin-func</code> returns a function defined over the domain [0,1] which will output a random value around the range [-1,1]. The first argument, <code>freq</code>, defines how many random points to select for the first step explained above. The higher the number, the rougher the noise. If the number is below 3, however, there won't be enough points to fit a cubic interpolator, and the function will fail.  </p>
-
-<p>The second argument, <code>levels</code>, defines how many times to go through the steps above. If <code>levels</code> is one, then only one set of random points will be generated. If <code>levels</code> is two, then two sets of random points will be generated, interpolated, and summed. </p>
-</td><td class="codes"></td></tr><tr><td class="docs"><h2>The details</h2>
-</td><td class="codes"></td></tr><tr><td class="docs"><p>To start off, <code>c</code> is a list of the form <code>[1 2 4 8 ...]</code>. We'll use it to select n random points for our first run, then 2n points for the second, and so on, as you can see in the definition of <code>frequencies</code>. <code>c</code> is also used to define the amplitude, or range of random numbers to pick from on each iteration. By taking the reciprocal (1/x) of <code>c</code>, we get the sequence, <code>[1 1/2 1/4 ...]</code>, which makes the random numbers smaller on each iteration. </p>
-
-<p>Since we now know how many points to pick on each iteration, and the range we should pick from, we can get a bunch of points using <code>rands-with-amplitude</code>. After runnin it, we get a list of lists, where each sublist contains an increasingly large number of random values. The next step is to create a cubic interpolation function for each of these lists of values with <code>get-cubic-interpolator</code>. When that's finished, we create a new function that returns the sum of all the interpolators we just made with `sum-funcs'.</p>
-</td><td class="codes"><pre class="brush: clojure">(defn get-perlin-func [freq levels]
-  &quot;Return a function, valid over domain [0,1] which produces perlin noise.&quot;
-  (let [c (expt-list 2 levels)
-        frequencies (map #(* freq %) c)
-        amplitudes  (map reciprocal c)]
-   (-&gt;&gt; [frequencies amplitudes]
-        (apply map rands-with-amplitude)
-        (map get-cubic-interpolator)
-        (apply sum-funcs))))</pre></td></tr><tr><td class="docs"><h1>Interpolation</h1>
-</td><td class="codes"><pre class="brush: clojure">(defn get-cubic-interpolator [y]
+</td><td class="codes"></td></tr><tr><td class="docs"><p>Cubic interpolation is central to the Perlin noise generator. It can be used repeatedly to generate smooth, random functions that can later be combined to form a natural-looking output. In this case, it accepts a single n-element sequence, <code>y</code>, as its argument, then creates n points equally-spaced on the x-axis, with f(x) = y. </p>
+</td><td class="codes"><pre class="brush: clojure">(defn get-cubic-interpolator [y] 
   &quot;Return cubic-interpolation function for values of y,
    where domain is assumed in [0,1].&quot;
   (let [x (linspace 0 1 (count y))
         points (zip x y)]
-   (incanter.interpolation/interpolate points :cubic)))</pre></td></tr><tr><td class="docs"><h1>Creating a new function from the sum of others.</h1>
-</td><td class="codes"><pre class="brush: clojure">(defn sum-funcs [&amp; funcs]
-  &quot;Return function where output is sum of all outputs from provided functions.&quot;
- (-&gt;&gt; funcs
-      (apply juxt)
-      (#(fn [x] (sum (% x))))))</pre></td></tr><tr><td class="docs"><h1>Utilities</h1>
-</td><td class="codes"></td></tr><tr><td class="docs"><p>These three functions help the generate random numbers needed for creating Perlin noise. </p>
+   (interpolate points :cubic)))</pre></td></tr><tr><td class="docs"><p>The function <code>get-perlin-func</code> returns a function defined over the domain [0,1] which will output a random value around the range [-1,1]. The first argument, <code>freq</code>, defines how many random points to select for the first step explained above. The higher the number, the rougher the noise. If the number is below 3, however, there won't be enough points to fit a cubic interpolator, and the function will fail.  </p>
+
+<p>The second argument, <code>levels</code>, defines how many times to go through the steps above. If <code>levels</code> is one, then only one set of random points will be generated. If <code>levels</code> is two, then two sets of random points will be generated, interpolated, and summed. </p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>To start off, <code>c</code> is a list of the form <code>[1 2 4 8 ...]</code>. We'll use it to select n random points for our first run, then 2n points for the second, and so on, as you can see in the definition of <code>frequencies</code>. <code>c</code> is also used to define the amplitude, or range of random numbers to pick from on each iteration. By taking the reciprocal (1/x) of <code>c</code>, we get the sequence, <code>[1 1/2 1/4 ...]</code>, which makes the random numbers smaller on each iteration. </p>
+
+<p>Since we now know how many points to pick on each iteration, and the range we should pick from, we can get a bunch of points using <code>rands-with-amplitude</code>. After runnin it, we get a list of lists, where each sublist contains an increasingly large number of random values. The next step is to create a cubic interpolation function for each of these lists of values with <code>get-cubic-interpolator</code>. When that's finished, we create a new function that returns the sum of all the interpolators we just made with `sum-funcs'.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn get-perlin-func [freq levels]
+  &quot;Return a function, valid over domain [0,1] which produces Perlin noise.&quot;
+  (let [c (expt-list 2 levels)
+        frequencies (map (partial * freq) c)
+        amplitudes  (map reciprocal c)]
+   (-&gt;&gt; [frequencies amplitudes]
+        (apply map rands-with-amplitude)
+        (map get-cubic-interpolator)
+        (apply sum-funcs))))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(def myfunc (get-perlin-func 10 5))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(println (map myfunc (linspace 0 1 10)))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defn -main
+  [])</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#rand-circles.util" name="rand-circles.util"><h1 class="project-name">rand-circles.util</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(ns rand-circles.util
+  (:require [clojure.math.numeric-tower :as math]))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defn negate [x]
+  &quot;Return -x.&quot;
+  (- 0 x))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defn reciprocal [x]
+  &quot;Return 1/x.&quot;
+  (/ 1.0 x))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defn expt-list [base n]
+  &quot;Return list of length n, starting with base^0 and ending with base^(n-1).&quot;
+  (-&gt;&gt; (range n)
+       (map (partial math/expt base))))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defn sum [coll]
+  &quot;Return sum of values in coll.&quot;
+  (reduce + coll))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defn zip [&amp; seqs]
+  &quot;Group elements of provided sequences into vectors by index.&quot;
+  (apply map vector seqs))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defn linspace [a b n]
+  &quot;Return list of n equally-spaced elements, 
+   with a as first and b as last.&quot;
+  (let [span (- b a)
+        interval (/ span (dec n))]
+   (-&gt;&gt; (range n)
+        (map #(+ a (* interval %)))
+        (map float))))</pre></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(defn rand-in-range [[low high]]
   &quot;Return random float in between low and high.&quot;
   (let [range-val (- high low)]
@@ -2927,33 +2951,11 @@ net.brehaut.ClojureTools = (function (SH) {
 </td><td class="codes"><pre class="brush: clojure">(defn rands-with-amplitude [n amplitude]
   &quot;Return n random floats between +amplitude and -amplitude.&quot;
   (rands-in-range n [(negate amplitude) amplitude]))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn linspace [a b n]
-  &quot;Return list of n equally-spaced elements, 
-   with a as first and b as last.&quot;
-  (let [span (- b a)
-        interval (/ span (dec n))]
-   (-&gt;&gt; (range n)
-        (map #(+ a (* interval %)))
-        (map float))))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn zip [&amp; seqs]
-  &quot;Group elements of provided sequences into vectors by index.&quot;
-  (apply map vector seqs))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn sum [coll]
-  &quot;Return sum of values in coll.&quot;
-  (reduce + coll))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn expt-list [base n]
-  &quot;Return list of length n, starting with base^0 and ending with base^(n-1).&quot;
-  (-&gt;&gt; (range n)
-       (map (partial math/expt base))))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn reciprocal [x]
-  &quot;Return 1/x.&quot;
-  (/ 1.0 x))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn negate [x]
-  &quot;Return -x.&quot;
-  (- 0 x))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(def x (get-perlin-func 10 5))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn -main
-  [])</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/gdeer81/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_rand-circles.core">rand-circles.core</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
+</td><td class="codes"><pre class="brush: clojure">(defn sum-funcs [&amp; funcs]
+  &quot;Return function where output is sum of all outputs from provided functions.&quot;
+ (-&gt;&gt; funcs
+      (apply juxt)
+      (comp sum)))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/gdeer81/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_rand-circles.core">rand-circles.core</li><li class="floating-toc-li" id="floating-toc_rand-circles.util">rand-circles.util</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
 SyntaxHighlighter.all();
 
 // hackity hack

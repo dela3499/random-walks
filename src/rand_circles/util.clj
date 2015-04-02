@@ -1,7 +1,5 @@
 (ns rand-circles.util
-  (:require [clojure.math.numeric-tower :as math]
-            [incanter interpolation])
-  (:gen-class))
+  (:require [clojure.math.numeric-tower :as math]))
 
 (defn negate [x]
   "Return -x."
@@ -50,4 +48,4 @@
   "Return function where output is sum of all outputs from provided functions."
  (->> funcs
       (apply juxt)
-      (#(fn [x] (sum (% x))))))
+      (comp sum)))
