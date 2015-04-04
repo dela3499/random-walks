@@ -1,5 +1,6 @@
 (ns rand-circles.util
-  (:require [clojure.math.numeric-tower :as math]))
+  (:require [clojure.math.numeric-tower :as math]
+            [incanter.interpolation :refer [interpolate]]))
 
 (defn negate [x]
   "Return -x."
