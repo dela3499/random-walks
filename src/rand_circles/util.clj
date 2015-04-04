@@ -49,3 +49,42 @@
  (->> funcs
       (apply juxt)
       (comp sum)))
+
+(defn partition-string 
+  "Partition string s into substrings of length n. Remainders are ignored."
+  [n s]
+  (->> s 
+      (partition n)
+      (map (partial apply str))))
+
+(defn hex-to-decimal 
+  "Convert hex string into base-10 integer."
+  [hex-string]
+  (Integer/parseInt hex-string 16))
+
+(defn hex-to-rgb
+  "Return rgb-value of hex color as 3-element list."
+  [hex-string]
+  (->> hex-string
+      (partition-string 2)
+      (map hex-to-decimal)))
+
+(defn transpose 
+  "Return transpose of a list-of-lists."
+  [x]
+  (apply map list x))
+
+(defn zip-keys
+  "Return collection of hashmaps given a hashmap of collections."
+  [x]
+  (->> (vals x)
+      transpose
+      (map (partial zipmap (keys x)))))
+
+(defn rescale
+  "Given an x in input-range, remap to output-range."
+  [input-range output-range x]
+  (let [[l1 h1] input-range
+        [l2 h2] output-range
+        points [[l1 l2] [h1 h2]]]
+    ((interpolate points :linear) x)))
