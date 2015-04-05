@@ -102,7 +102,7 @@
    :opacity [0.05 0.4]
    :radius [0 30]})
 
-(def f "images/img25.svg")
+(def f "images/output.svg")
 
 (spit f (->> config
             get-random-walking-circles
