@@ -42,9 +42,9 @@
 
 ;; To start off, `c` is a list of the form `[1 2 4 8 ...]`. We'll use it to select n random points for our first run, then 2n points for the second, and so on, as you can see in the definition of `frequencies`. `c` is also used to define the amplitude, or range of random numbers to pick from on each iteration. By taking the reciprocal (1/x) of `c`, we get the sequence, `[1 1/2 1/4 ...]`, which makes the random numbers smaller on each iteration. 
 ;;
-;; Since we now know how many points to pick on each iteration, and the range we should pick from, we can get a bunch of points using `rands-with-amplitude`. After runnin it, we get a list of lists, where each sublist contains an increasingly large number of random values. The next step is to create a cubic interpolation function for each of these lists of values with `get-cubic-interpolator`. When that's finished, we create a new function that returns the sum of all the interpolators we just made with `sum-funcs'.
+;; Since we now know how many points to pick on each iteration, and the range we should pick from, we can get a bunch of points using `rands-with-amplitude`. After running it, we get a list of lists, where each sublist contains an increasingly large number of random values. The next step is to create a cubic interpolation function for each of these lists of values with `get-cubic-interpolator`. When that's finished, we create a new function that returns the sum of all the interpolators we just made with `sum-funcs'.
 (defn get-perlin-func [freq levels]
-  "Return a function, valid over domain [0,1] which produces Perlin noise."
+  "Return a function, valid over domain [0,1] which produces Perlin noise around range [-1,1]."
   (let [c (expt-list 2 levels)
         frequencies (map (partial * freq) c)
         amplitudes  (map reciprocal c)]
@@ -53,6 +53,7 @@
         (map #(interpolate-parametric % :cubic))
         (apply sum-funcs))))
 
+;; Now that we've got a Perlin noise generator, we can use it to control some parameter, like position. Since the output of the generator is around the range [-1,1], we'll need to rescale it to whatever range we need. 
 (defn get-rough-path
   "Return path through waypoints with given roughness, at each value of x.
    Inputs: waypoints - collection of scalars or collections (of scalars)

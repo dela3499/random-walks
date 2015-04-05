@@ -2866,15 +2866,43 @@ net.brehaut.ClojureTools = (function (SH) {
   };
 })(SyntaxHighlighter);
 </script><title>rand-circles -- Marginalia</title></head><body><table><tr><td class="docs"><div class="header"><h1 class="project-name"><a href="none">rand-circles</a></h1><h2 class="project-version">0.1.0-SNAPSHOT</h2><br /><p>Generative art: create a random-walk.</p>
-</div><div class="dependencies"><h3>dependencies</h3><table><tr><td class="dep-name">org.clojure/clojure</td><td class="dotted"><hr /></td><td class="dep-version">1.6.0</td></tr><tr><td class="dep-name">org.clojure/math.numeric-tower</td><td class="dotted"><hr /></td><td class="dep-version">0.0.4</td></tr><tr><td class="dep-name">incanter</td><td class="dotted"><hr /></td><td class="dep-version">1.9.0</td></tr><tr><td class="dep-name">incanter/incanter-core</td><td class="dotted"><hr /></td><td class="dep-version">1.9.0</td></tr></table></div></td><td class="codes" style="text-align: center; vertical-align: middle;color: #666;padding-right:20px"><br /><br /><br />(this space intentionally left almost blank)</td></tr><tr><td class="docs"><div class="toc"><a name="toc"><h3>namespaces</h3></a><ul><li><a href="#rand-circles.core">rand-circles.core</a></li><li><a href="#rand-circles.util">rand-circles.util</a></li></ul></div></td><td class="codes">&nbsp;</td></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#rand-circles.core" name="rand-circles.core"><h1 class="project-name">rand-circles.core</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
+</div><div class="dependencies"><h3>dependencies</h3><table><tr><td class="dep-name">org.clojure/clojure</td><td class="dotted"><hr /></td><td class="dep-version">1.6.0</td></tr><tr><td class="dep-name">org.clojure/math.numeric-tower</td><td class="dotted"><hr /></td><td class="dep-version">0.0.4</td></tr><tr><td class="dep-name">incanter</td><td class="dotted"><hr /></td><td class="dep-version">1.9.0</td></tr><tr><td class="dep-name">incanter/incanter-core</td><td class="dotted"><hr /></td><td class="dep-version">1.9.0</td></tr><tr><td class="dep-name">org.clojure/algo.generic</td><td class="dotted"><hr /></td><td class="dep-version">0.1.2</td></tr></table></div></td><td class="codes" style="text-align: center; vertical-align: middle;color: #666;padding-right:20px"><br /><br /><br />(this space intentionally left almost blank)</td></tr><tr><td class="docs"><div class="toc"><a name="toc"><h3>namespaces</h3></a><ul><li><a href="#rand-circles.color">rand-circles.color</a></li><li><a href="#rand-circles.core">rand-circles.core</a></li><li><a href="#rand-circles.util">rand-circles.util</a></li></ul></div></td><td class="codes">&nbsp;</td></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#rand-circles.color" name="rand-circles.color"><h1 class="project-name">rand-circles.color</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(ns rand-circles.color
+  (:require [clojure.string :refer [split]]
+            [rand-circles.util :refer [string-to-float]]))</pre></td></tr><tr><td class="docs"><p><a href="https://color.adobe.com">Adobe Kuler</a> provides a fast, interactive way to select color schemes. As you explore different options, the url is updated to reflect the colors you've selected. I've pasted and parsed a number of these below.</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>Given a string url, return a list of RGB values (themselves 3-element lists.)</p>
+</td><td class="codes"><pre class="brush: clojure">(defn parse-kuler-url
+  [url]
+  (-&gt;&gt; url
+      (re-find #&quot;rgbvalues=(.*)&amp;swatchOrder&quot;)
+      (#(nth % 1))
+      (#(split % #&quot;,&quot;))
+      (map string-to-float)
+      (map #(* 255 %))
+      (partition 3)))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(def kuler-urls
+  [&quot;https://color.adobe.com/create/color-wheel/?base=3&amp;rule=Monochromatic&amp;selected=1&amp;name=My%20Color%20Theme&amp;mode=rgb&amp;rgbvalues=1,1,1,0.007918733758563676,0.13505272703720764,0.16431372549019613,0.10980392156862745,0.6039215686274509,0.7176470588235294,0.31951807228915663,0.8057390548913937,0.9176470588235295,0.029766123316796626,0.5076564321804343,0.6176470588235294,0.020127569099929153,0.34327244461724615,0.41764705882352954&amp;swatchOrder=1,3,2,0,4&quot;
+  &quot;https://color.adobe.com/create/color-wheel/?base=3&amp;rule=Monochromatic&amp;selected=3&amp;name=My%20Color%20Theme&amp;mode=rgb&amp;rgbvalues=0.4066666666666667,0.2596139230884888,0.019598393574297206,0.8833333333333333,0.5990896747929055,0.1351548269581056,0.44235294117647045,0.31120321991081035,0.09714417531718567,0.86,0.5490196078431373,0.04144578313253016,0.6599999999999999,0.4213406292747604,0.03180722891566268,1,1,1&amp;swatchOrder=1,3,2,0,4&quot;
+  &quot;https://color.adobe.com/create/color-wheel/?base=3&amp;rule=Monochromatic&amp;selected=3&amp;name=My%20Color%20Theme&amp;mode=rgb&amp;rgbvalues=0.18338535414172807,0.3152941176470589,0.017001229407425628,0.4973372027963519,0.7919607843137255,0.1257115015602658,0.23074661667833857,0.35098039215686266,0.07908882712073723,0.4470588235294118,0.7686274509803922,0.04144578313253016,0.33073229291729556,0.5686274509803921,0.030661421194984023&amp;swatchOrder=1,3,2,0,4&quot;
+  &quot;https://color.adobe.com/create/color-wheel/?base=3&amp;rule=Complementary&amp;selected=4&amp;name=My%20Color%20Theme&amp;mode=rgb&amp;rgbvalues=0.4686274509803922,0.31902604331445644,0.012634620113105488,1,0.7224200037850999,0.1539218096877305,0,0.17937800070405646,0.4686274509803922,0.7686274509803922,0.5300548380469997,0.04144578313253013,0.2627450980392157,0.45638327453134514,0.7686274509803922&amp;swatchOrder=1,3,2,0,4&quot;
+  &quot;https://color.adobe.com/create/color-wheel/?base=3&amp;rule=Triad&amp;selected=2&amp;name=My%20Color%20Theme&amp;mode=rgb&amp;rgbvalues=0.318399152221312,0.4686274509803922,0.07213198532425019,0.1242440751400962,0.3244275613327357,0.8071895424836601,0.5686274509803921,0.3003751020440592,0.24234924695801538,0.4931053471682004,0.7686274509803922,0.04144578313253013,0.4686274509803922,0.08485249869608935,0.0018378676771913438&amp;swatchOrder=1,3,2,0,4&quot;])</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(def colors
+  (mapcat parse-kuler-url kuler-urls))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#rand-circles.core" name="rand-circles.core"><h1 class="project-name">rand-circles.core</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(ns rand-circles.core
-  (:require [incanter.interpolation :refer [interpolate]]
+  (:require [incanter.interpolation :refer [interpolate-parametric]]
+            [clojure.algo.generic.functor :refer [fmap]]
+            [clojure.string :refer [join split]]
+            [rand-circles.color]
             [rand-circles.util :refer [linspace 
                                        zip 
                                        expt-list 
                                        reciprocal 
                                        rands-with-amplitude 
-                                       sum-funcs]])
+                                       sum-funcs
+                                       hex-to-rgb
+                                       zip-keys
+                                       rescale
+                                       string-to-float]])
   (:gen-class))</pre></td></tr><tr><td class="docs"><h1>Random walks with Perlin Noise</h1>
 </td><td class="codes"></td></tr><tr><td class="docs"><p><a href="http://natureofcode.com/book/introduction/">Random walks</a> provide a simple way to create natural-looking shapes and lines. <a href="http://en.wikipedia.org/wiki/Perlin_noise">Perlin noise</a> is one method that allows you to finely tune how rough you'd like your data to be. </p>
 </td><td class="codes"></td></tr><tr><td class="docs"><p>First, we'll create a Perlin noise generator, then use it to control the position, color, and size of several shapes. </p>
@@ -2890,33 +2918,73 @@ net.brehaut.ClojureTools = (function (SH) {
 <li>You can repeat this process of making new functions and summing them all up as many times as you like, though each function will change the output of the noise generator less and less.</li>
 </ol>
 </td><td class="codes"></td></tr><tr><td class="docs"><h2>Implementing a Perlin noise generator</h2>
-</td><td class="codes"></td></tr><tr><td class="docs"><p>Cubic interpolation is central to the Perlin noise generator. It can be used repeatedly to generate smooth, random functions that can later be combined to form a natural-looking output. In this case, it accepts a single n-element sequence, <code>y</code>, as its argument, then creates n points equally-spaced on the x-axis, with f(x) = y. </p>
-</td><td class="codes"><pre class="brush: clojure">(defn get-cubic-interpolator [y] 
-  &quot;Return cubic-interpolation function for values of y,
-   where domain is assumed in [0,1].&quot;
-  (let [x (linspace 0 1 (count y))
-        points (zip x y)]
-   (interpolate points :cubic)))</pre></td></tr><tr><td class="docs"><p>The function <code>get-perlin-func</code> returns a function defined over the domain [0,1] which will output a random value around the range [-1,1]. The first argument, <code>freq</code>, defines how many random points to select for the first step explained above. The higher the number, the rougher the noise. If the number is below 3, however, there won't be enough points to fit a cubic interpolator, and the function will fail.  </p>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>The function <code>get-perlin-func</code> returns a function defined over the domain [0,1] which will output a random value around the range [-1,1]. The first argument, <code>freq</code>, defines how many random points to select for the first step explained above. The higher the number, the rougher the noise. If the number is below 3, however, there won't be enough points to fit a cubic interpolator, and the function will fail.  </p>
 
 <p>The second argument, <code>levels</code>, defines how many times to go through the steps above. If <code>levels</code> is one, then only one set of random points will be generated. If <code>levels</code> is two, then two sets of random points will be generated, interpolated, and summed. </p>
 </td><td class="codes"></td></tr><tr><td class="docs"><p>To start off, <code>c</code> is a list of the form <code>[1 2 4 8 ...]</code>. We'll use it to select n random points for our first run, then 2n points for the second, and so on, as you can see in the definition of <code>frequencies</code>. <code>c</code> is also used to define the amplitude, or range of random numbers to pick from on each iteration. By taking the reciprocal (1/x) of <code>c</code>, we get the sequence, <code>[1 1/2 1/4 ...]</code>, which makes the random numbers smaller on each iteration. </p>
 
-<p>Since we now know how many points to pick on each iteration, and the range we should pick from, we can get a bunch of points using <code>rands-with-amplitude</code>. After runnin it, we get a list of lists, where each sublist contains an increasingly large number of random values. The next step is to create a cubic interpolation function for each of these lists of values with <code>get-cubic-interpolator</code>. When that's finished, we create a new function that returns the sum of all the interpolators we just made with `sum-funcs'.</p>
+<p>Since we now know how many points to pick on each iteration, and the range we should pick from, we can get a bunch of points using <code>rands-with-amplitude</code>. After running it, we get a list of lists, where each sublist contains an increasingly large number of random values. The next step is to create a cubic interpolation function for each of these lists of values with <code>get-cubic-interpolator</code>. When that's finished, we create a new function that returns the sum of all the interpolators we just made with `sum-funcs'.</p>
 </td><td class="codes"><pre class="brush: clojure">(defn get-perlin-func [freq levels]
-  &quot;Return a function, valid over domain [0,1] which produces Perlin noise.&quot;
+  &quot;Return a function, valid over domain [0,1] which produces Perlin noise around range [-1,1].&quot;
   (let [c (expt-list 2 levels)
         frequencies (map (partial * freq) c)
         amplitudes  (map reciprocal c)]
    (-&gt;&gt; [frequencies amplitudes]
         (apply map rands-with-amplitude)
-        (map get-cubic-interpolator)
-        (apply sum-funcs))))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(def myfunc (get-perlin-func 10 5))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(println (map myfunc (linspace 0 1 10)))</pre></td></tr><tr><td class="docs">
+        (map #(interpolate-parametric % :cubic))
+        (apply sum-funcs))))</pre></td></tr><tr><td class="docs"><p>Return path through waypoints with given roughness, at each value of x.
+   Inputs: waypoints - collection of scalars or collections (of scalars)
+           roughness - scalar between 0 and 1
+           x - collection of scalars.</p>
+
+<p>Now that we've got a Perlin noise generator, we can use it to control some parameter, like position. Since the output of the generator is around the range [-1,1], we'll need to rescale it to whatever range we need. </p>
+</td><td class="codes"><pre class="brush: clojure">(defn get-rough-path
+  [roughness waypoints x]
+  (-&gt;&gt; x
+      (map (comp (interpolate-parametric waypoints :linear)
+                 (partial rescale [-1.2 1.2] [0 1])
+                 (get-perlin-func (rescale [0 1] [5 50] roughness) 4)))))</pre></td></tr><tr><td class="docs"><p>Create a sequence of hashmaps representing circles where each parameter is generated by a random walk.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn get-random-walking-circles
+  [config]
+  (-&gt;&gt; [:color :opacity :radius :x :y]
+      (select-keys config)
+      (fmap #(get-rough-path (:roughness config)
+                             %
+                             (linspace 0 1 (:n-points config))))
+      zip-keys))</pre></td></tr><tr><td class="docs"><p>Create an string specifying a circle in SVG, given a hashmap with the appropriate properties.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn make-svg-circle
+  [circle]
+  (let [names {:radius &quot;r&quot;
+               :color &quot;fill&quot;
+               :opacity &quot;fill-opacity&quot;
+               :x &quot;cx&quot;
+               :y &quot;cy&quot;}
+        format-color (fn [c] (update-in c [:color] #(str &quot;rgb(&quot; (join &quot;,&quot; %) &quot;)&quot;)))]
+    (-&gt;&gt; circle
+        format-color
+        (map (fn [[k v]] (str (k names) &quot;=&quot; &quot;\&quot;&quot; v &quot;\&quot;&quot;)))
+        (join &quot; &quot;)
+        (#(str &quot;&lt;circle &quot; % &quot;/&gt;&quot;)))))</pre></td></tr><tr><td class="docs"><p>Create SVG  ;;;;;;;;;;;;;;;;;;;</p>
+</td><td class="codes"></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(def config
+  {:x [300 1300]
+   :y [200 700]
+   :roughness 0.9
+   :n-points 10000
+   :color rand-circles.color/colors
+   :opacity [0.05 0.4]
+   :radius [0 30]})</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(def f &quot;images/output.svg&quot;)</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(spit f (-&gt;&gt; config
+            get-random-walking-circles
+            (map make-svg-circle)
+            (join &quot;\n&quot;)
+            (#(str &quot;&lt;svg width=\&quot;1600\&quot; height=\&quot;900\&quot;&gt; &lt;g id=\&quot;layer1\&quot;&gt; &quot; % &quot; &lt;/g&gt;&lt;/svg&gt;&quot;))))</pre></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(defn -main
   [])</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#rand-circles.util" name="rand-circles.util"><h1 class="project-name">rand-circles.util</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(ns rand-circles.util
-  (:require [clojure.math.numeric-tower :as math]))</pre></td></tr><tr><td class="docs">
+  (:require [clojure.math.numeric-tower :as math]
+            [incanter.interpolation :refer [interpolate]]))</pre></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(defn negate [x]
   &quot;Return -x.&quot;
   (- 0 x))</pre></td></tr><tr><td class="docs">
@@ -2955,7 +3023,37 @@ net.brehaut.ClojureTools = (function (SH) {
   &quot;Return function where output is sum of all outputs from provided functions.&quot;
  (-&gt;&gt; funcs
       (apply juxt)
-      (comp sum)))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/gdeer81/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_rand-circles.core">rand-circles.core</li><li class="floating-toc-li" id="floating-toc_rand-circles.util">rand-circles.util</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
+      (comp sum)))</pre></td></tr><tr><td class="docs"><p>Partition string s into substrings of length n. Remainders are ignored.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn partition-string 
+  [n s]
+  (-&gt;&gt; s 
+      (partition n)
+      (map (partial apply str))))</pre></td></tr><tr><td class="docs"><p>Convert hex string into base-10 integer.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn hex-to-decimal 
+  [hex-string]
+  (Integer/parseInt hex-string 16))</pre></td></tr><tr><td class="docs"><p>Return rgb-value of hex color as 3-element list.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn hex-to-rgb
+  [hex-string]
+  (-&gt;&gt; hex-string
+      (partition-string 2)
+      (map hex-to-decimal)))</pre></td></tr><tr><td class="docs"><p>Return transpose of a list-of-lists.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn transpose 
+  [x]
+  (apply map list x))</pre></td></tr><tr><td class="docs"><p>Return collection of hashmaps given a hashmap of collections.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn zip-keys
+  [x]
+  (-&gt;&gt; (vals x)
+      transpose
+      (map (partial zipmap (keys x)))))</pre></td></tr><tr><td class="docs"><p>Given an x in input-range, remap to output-range.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn rescale
+  [input-range output-range x]
+  (let [[l1 h1] input-range
+        [l2 h2] output-range
+        points [[l1 l2] [h1 h2]]]
+    ((interpolate points :linear) x)))</pre></td></tr><tr><td class="docs"><p>Convert string to a float.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn string-to-float
+  [x]
+  (Float. x))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/gdeer81/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_rand-circles.color">rand-circles.color</li><li class="floating-toc-li" id="floating-toc_rand-circles.core">rand-circles.core</li><li class="floating-toc-li" id="floating-toc_rand-circles.util">rand-circles.util</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
 SyntaxHighlighter.all();
 
 // hackity hack
