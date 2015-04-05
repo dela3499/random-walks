@@ -1,6 +1,7 @@
 (ns rand-circles.core
   (:require [incanter.interpolation :refer [interpolate-parametric]]
             [clojure.algo.generic.functor :refer [fmap]]
+            [clojure.string :refer [join]]
             [rand-circles.util :refer [linspace 
                                        zip 
                                        expt-list 
@@ -86,7 +87,53 @@
    :opacity [1 1]
    :radius [0.01 0.05]})
 
-(println (get-random-walking-circles config))
+(defn make-svg-circle [circle]
+  (let [names {:radius "r"
+               :color "fill"
+               :opacity "fill-opacity"
+               :x "cx"
+               :y "cy"}
+        format-color (fn [c] (update-in c [:color] #(str "rgb(" % ")")))]
+    (->> circle
+        format-color
+        (map (fn [k v] (str (k names) "=" "\"" v "\"")))
+        (join " ")
+        (#(str "<circle " % "/>")))))
+
+(println (->> config
+              get-random-walking-circles
+              (map make-svg-circle)))
 
 (defn -main
   [])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
