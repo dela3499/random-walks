@@ -89,3 +89,8 @@
         [l2 h2] output-range
         points [[l1 l2] [h1 h2]]]
     ((interpolate points :linear) x)))
+
+(defn string-to-float
+  "Convert string to a float."
+  [x]
+  (Float. x))
