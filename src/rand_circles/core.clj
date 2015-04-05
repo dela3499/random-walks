@@ -100,7 +100,7 @@
    :n-points 10000
    :color rand-circles.color/colors
    :opacity [0.05 0.4]
-   :radius [0 5 20 40]})
+   :radius [0 30]})
 
 (def f "images/img25.svg")
 
@@ -112,32 +112,3 @@
 
 (defn -main
   [])
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
