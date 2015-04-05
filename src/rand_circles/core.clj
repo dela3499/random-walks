@@ -51,8 +51,6 @@
         (map #(interpolate-parametric % :cubic))
         (apply sum-funcs))))
 
-
-
 (defn get-rough-path
   "Return path through waypoints with given roughness, at each value of x.
    Inputs: waypoints - collection of scalars or collections (of scalars)
@@ -74,35 +72,38 @@
                              (linspace 0 1 (:n-points config))))
       zip-keys))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;; Create SVG  ;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(def config
-  {:x [0 1]
-   :y [0 1]
-   :roughness 0.5
-   :n-points 1000
-   :color (->> ["626158" "62603B"] (map hex-to-rgb))
-   :opacity [1 1]
-   :radius [0.01 0.05]})
-
-(defn make-svg-circle [circle]
+(defn make-svg-circle
+  "Create an string specifying a circle in SVG, given a hashmap with the appropriate properties."
+  [circle]
   (let [names {:radius "r"
                :color "fill"
                :opacity "fill-opacity"
                :x "cx"
                :y "cy"}
-        format-color (fn [c] (update-in c [:color] #(str "rgb(" % ")")))]
+        format-color (fn [c] (update-in c [:color] #(str "rgb(" (join "," %) ")")))]
     (->> circle
         format-color
-        (map (fn [k v] (str (k names) "=" "\"" v "\"")))
+        (map (fn [[k v]] (str (k names) "=" "\"" v "\"")))
         (join " ")
         (#(str "<circle " % "/>")))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;; Create SVG  ;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def config
+  {:x [200 1800]
+   :y [200 1800]
+   :roughness 0.7
+   :n-points 5000
+   :color (->> ["89F8DB" "87E18D" "DEF889" "83C4EE" "EECF3E"] (map hex-to-rgb))
+   :opacity [0.1 0.4]
+   :radius [5 80]})
+
 (println (->> config
               get-random-walking-circles
-              (map make-svg-circle)))
+              (map make-svg-circle)
+              (join "\n")))
 
 (defn -main
   [])
