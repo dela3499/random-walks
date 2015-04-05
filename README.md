@@ -1,34 +1,16 @@
 # rand-circles
 
-FIXME: description
-
-## Installation
-
-Download from http://example.com/FIXME.
+Generative random SVG images using Perlin Noise. See annotated source [here](http://dela3499.github.io/random-walks/).
 
 ## Usage
+Download and execute `lein run` to generate an image called 'output.svg' in the images folder. Running again will overwrite this file.
 
-FIXME: explanation
+## Example outputs
+![example output image](/images/presentation/p5.png)
+![example output image](/images/presentation/p7.png)
+![example output image](/images/presentation/p9.png)
+![example output image](/images/presentation/p11.png)
 
-    $ java -jar rand-circles-0.1.0-standalone.jar [args]
-
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
-
-## License
 
 Copyright © 2015 FIXME
 
